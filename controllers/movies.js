@@ -47,7 +47,7 @@ module.exports.addMovie = (req, res, next) => {
     .then((movie) => res.status(Statuses.CREATED).send(movie))
     .catch((err) => {
       if (err instanceof ValidationError) {
-        next(new BadRequestError('Переданы некорректные данные при добавлении фильма'));
+        next(new BadRequestError(err.message));
       } else {
         next(err);
       }
