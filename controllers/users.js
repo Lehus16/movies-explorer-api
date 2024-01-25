@@ -9,6 +9,16 @@ const BadRequestError = require('../errors/badRequest');
 const MongoDuplicateConflict = require('../errors/mongoDuplicate');
 const Statuses = require('../utils/codeStatuses');
 
+const {
+  MONGO_CONFLICT_MESSAGE,
+  USER_BAD_REQUEST_MESSAGE,
+  USER_PATCH_BAD_REQUEST_MESSAGE,
+  SUCCESS_LOGOUT_MESSAGE,
+  SUCCESS_LOGIN_MESSAGE,
+  INVALID_USER_ID_MESSAGE,
+  USER_NOT_FOUND_MESSAGE,
+} = require('../utils/responseMessages');
+
 const SAULT_ROUNDS = 10;
 
 module.exports.signUp = (req, res, next) => {
@@ -26,9 +36,9 @@ module.exports.signUp = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === Statuses.MONGO_DUPLICATE) {
-        next(new MongoDuplicateConflict('Пользователь с таким email уже существует'));
+        next(new MongoDuplicateConflict(MONGO_CONFLICT_MESSAGE));
       } else if (err instanceof ValidationError) {
-        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        next(new BadRequestError(USER_BAD_REQUEST_MESSAGE));
       } else {
         next(err);
       }
@@ -45,18 +55,18 @@ module.exports.signIn = (req, res, next) => {
         httpOnly: true,
         sameSite: true,
       });
-      return res.send({ message: 'Осуществлена авторизация. Вы вошли.' });
+      return res.send({ message: SUCCESS_LOGIN_MESSAGE });
     })
     .catch(next);
 };
 
 module.exports.signOut = (req, res) => {
-  res.clearCookie('jwt').send({ message: 'Вы вышли.' });
+  res.clearCookie('jwt').send({ message: SUCCESS_LOGOUT_MESSAGE });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
+    .orFail(new NotFoundError(USER_NOT_FOUND_MESSAGE))
     .then((user) => res.status(Statuses.OK_REQUEST).send(user))
     .catch((err) => {
       next(err);
@@ -65,15 +75,15 @@ module.exports.getCurrentUser = (req, res, next) => {
 module.exports.patchUserInfo = (req, res, next) => {
   const { name, email } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
-    .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
+    .orFail(new NotFoundError(USER_NOT_FOUND_MESSAGE))
     .then((user) => res.status(Statuses.OK_REQUEST).send(user))
     .catch((err) => {
       if (err.code === Statuses.MONGO_DUPLICATE) {
-        next(new MongoDuplicateConflict('Пользователь с таким email уже существует'));
+        next(new MongoDuplicateConflict(MONGO_CONFLICT_MESSAGE));
       } else if (err instanceof CastError) {
-        next(new BadRequestError('Переданы некорректный ID при обновлении профиля'));
+        next(new BadRequestError(INVALID_USER_ID_MESSAGE));
       } else if (err instanceof ValidationError) {
-        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
+        next(new BadRequestError(USER_PATCH_BAD_REQUEST_MESSAGE));
       } else {
         next(err);
       }

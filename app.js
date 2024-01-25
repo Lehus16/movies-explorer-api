@@ -10,8 +10,10 @@ const errorHandler = require('./middlewares/errorHandler');
 const cors = require('./middlewares/corsHandler');
 const rateLimiter = require('./middlewares/rateLimiter');
 const NotFoundError = require('./errors/notFound');
+const { NOT_FOUND_MESSAGE } = require('./utils/responseMessages');
 
 const { PORT = 3000, MONGO_URL, NODE_ENV } = process.env;
+const { MONGO_URL_DEV } = require('./utils/dev.env.config');
 
 const app = express();
 
@@ -32,7 +34,7 @@ app.use(requestLogger);
 
 // Root route
 app.use(router);
-app.use('*', (req, res, next) => next(new NotFoundError('Страница не найдена.')));
+app.use('*', (req, res, next) => next(new NotFoundError(NOT_FOUND_MESSAGE)));
 // Логгер ошибок
 app.use(errorLogger);
 
@@ -41,7 +43,7 @@ app.use(errors());
 app.use(errorHandler);
 
 async function init() {
-  await mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/bitfilmsdb');
+  await mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV);
   app.listen(PORT);
 }
 
