@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const isEmail = require('validator/lib/isEmail');
 
+const UnauthorizedError = require('../errors/unauthorized');
+
 const userSchema = new mongoose.Schema({
   email: {
     required: {
@@ -33,8 +35,7 @@ const userSchema = new mongoose.Schema({
     maxlength: [30, 'Максимум 30 символов'],
   },
 
-})
-
+});
 
 userSchema.statics.findUserByCredentials = function findOneFunc(email, password) {
   return this.findOne({ email }).select('+password')
