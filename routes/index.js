@@ -14,5 +14,10 @@ router.use('/', authRouter);
 router.use('/users', auth, userRouter);
 router.use('/movies', auth, moviesRouter);
 router.get('/signout', auth, signOut);
+router.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 module.exports = router;
