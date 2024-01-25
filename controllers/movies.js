@@ -4,6 +4,7 @@ const Movie = require('../models/movie');
 // имппорт ошибок и их кодов
 const NotFoundError = require('../errors/notFound');
 const BadRequestError = require('../errors/badRequest');
+const ForbiddenError = require('../errors/forbiddenError');
 const Statuses = require('../utils/codeStatuses');
 
 module.exports.getMovie = (req, res, next) => {
@@ -56,8 +57,14 @@ module.exports.addMovie = (req, res, next) => {
 
 module.exports.deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
-  Movie.findByIdAndRemove(movieId)
+  Movie.findById(movieId)
     .orFail(new NotFoundError('Фильм по указанному _id не найден'))
+    .then((movie) => {
+      if (movie.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Нельзя удалять чужие фильмы');
+      }
+      return Movie.deleteOne({ _id: movieId });
+    })
     .then(() => res.status(Statuses.OK_REQUEST).send({ message: 'Фильм удален' }))
     .catch((err) => {
       if (err instanceof CastError) {
