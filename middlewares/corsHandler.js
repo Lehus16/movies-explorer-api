@@ -1,6 +1,6 @@
 const allowedCors = [
-  'http://lehus.movie-explorer.nomoredomainsmonster.ru',
-  'https://lehus.movie-explorer.nomoredomainsmonster.ru',
+  'http://lehus.movies.nomoredomainsmonster.ru',
+  'https://lehus.movies.nomoredomainsmonster.ru',
   'http://localhost:3000',
   'https://localhost:3000',
   'http://127.0.0.1:3000',
