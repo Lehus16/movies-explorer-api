@@ -52,8 +52,10 @@ module.exports.signIn = (req, res, next) => {
       const token = generateToken({ _id: user._id });
       res.cookie('jwt', token, {
         maxAge: 3600000,
-        httpOnly: true,
-        sameSite: true,
+        // httpOnly: true,
+        // sameSite: true,
+        secure: true,
+        sameSite: false,
       });
       return res.send({ message: SUCCESS_LOGIN_MESSAGE });
     })
